@@ -58,7 +58,7 @@ public class PtGen {
 	private static int tCour;
 
 	// adresse d'éxecution à sauvegarder pour une affection
-	private static int adresseAff, reservation;
+	private static int adresseAff, reservation, addrExec;
 
 	// TABLE DES SYMBOLES
 	// ----------------------
@@ -192,6 +192,7 @@ public class PtGen {
 
 		reservation = 0;
 		adresseAff = -1;
+		addrExec = 0;
 	}
 
 	/**
@@ -219,9 +220,6 @@ public class PtGen {
 				}
 				// P R O C
 				placeIdent(UtilLex.numIdCourant, CONSTANTE, tCour, vCour);
-
-				// Mise à jour var
-				vCour = -1;
 				break;
 
 			// VARGLOBALE
@@ -231,10 +229,8 @@ public class PtGen {
 					break;
 				}
 				// P R O C
-				placeIdent(UtilLex.numIdCourant, VARGLOBALE, tCour, vCour);
-
+				placeIdent(UtilLex.numIdCourant, VARGLOBALE, tCour, addrExec++);
 				// Mises à jour var
-				vCour = -1;
 				reservation += 1;
 				break;
 
@@ -279,7 +275,7 @@ public class PtGen {
 			//|				P R I M A I R E				  |
 			//|===========================================|
 
-			// V A L E U R
+			// I D E N T
 			case 9:
 				int index = presentIdent(1);
 				if (index == 0) { UtilLex.messErr("Variable { "+ UtilLex.chaineIdent(UtilLex.numIdCourant) +" } non déclarée"); break;}
@@ -289,11 +285,11 @@ public class PtGen {
 					po.produire(tabSymb[index].info);
 				} else {
 					po.produire(CONTENUG);
-					po.produire(index);
+					po.produire(tabSymb[index].info);
 				}
 				break;
 
-			// I D E N T
+			// V A L E U R
 			case 10:
 				po.produire(EMPILER);
 				po.produire(vCour);
@@ -362,7 +358,7 @@ public class PtGen {
 				int iAff = presentIdent(1);
 				if (iAff == 0) {UtilLex.messErr("Variable { "+ UtilLex.chaineIdent(UtilLex.numIdCourant) +" } non déclarée !"); break;}
 				if (tabSymb[iAff].categorie == CONSTANTE) { UtilLex.messErr("Ré-affectation des constantes interdite !"); break;}
-				adresseAff = iAff;
+				adresseAff = tabSymb[iAff].info;
 				break;
 
 			case 25:
@@ -389,7 +385,7 @@ public class PtGen {
 				}
 				
 				po.produire(AFFECTERG);
-				po.produire(iLec);
+				po.produire(tabSymb[iLec].info);
 
 				break;
 
