@@ -16,7 +16,7 @@ import libIO.*;
 public class PtGen {
 
 	// Renseigner ici un nom pour le trinome, constitué UNIQUEMENT DE LETTRES
-	public static String trinome = "A COMPLETER"; // TODO
+	public static String trinome = "RIO"; 
 
 	// taille max de la table des symboles
 	private static final int MAXSYMB = 300;
@@ -56,6 +56,9 @@ public class PtGen {
 
 	// contrôle de type : type de l'expression compilee
 	private static int tCour;
+
+	// adresse d'éxecution à sauvegarder pour une affection
+	private static int adresseAff, reservation;
 
 	// TABLE DES SYMBOLES
 	// ----------------------
@@ -187,8 +190,8 @@ public class PtGen {
 		// initialisation du type de l'expression courante
 		tCour = NEUTRE;
 
-		// TODO si necessaire
-
+		reservation = 0;
+		adresseAff = -1;
 	}
 
 	/**
@@ -204,8 +207,266 @@ public class PtGen {
 				initialisations();
 				break;
 
-			// TODO
+			//|===========================================|@declarations
+			//|         D E C L A R A T I O N S			  |		
+			//|===========================================|
 
+			// CONSTANTE
+			case 1:
+				if (presentIdent(bc)>0) {
+					UtilLex.messErr("Ré-affectation des constantes interdite");
+					break;
+				}
+				// P R O C
+				placeIdent(UtilLex.numIdCourant, CONSTANTE, tCour, vCour);
+
+				// Mise à jour var
+				vCour = -1;
+				break;
+
+			// VARGLOBALE
+			case 2:
+				if (presentIdent(bc)>0) {
+					UtilLex.messErr("Ident { "+ UtilLex.chaineIdent(UtilLex.numIdCourant) +" } déjà reservé");
+					break;
+				}
+				// P R O C
+				placeIdent(UtilLex.numIdCourant, VARGLOBALE, tCour, vCour);
+
+				// Mises à jour var
+				vCour = -1;
+				reservation += 1;
+				break;
+
+			case 100:
+				po.produire(RESERVER);
+				po.produire(reservation);
+				reservation = 0;
+				break;
+			
+			//|===========================================|@valeur
+			//|					V A L E U R				  |
+			//|===========================================|
+
+			// M.À.J   T Y P E
+			case 3:
+				tCour = ENT;
+				break;
+
+			case 4:
+				tCour = BOOL;
+				break;
+
+			// M.À.J   N B E N T I E R
+			case 5:
+				vCour = UtilLex.valEnt;
+				break;
+
+			case 6:
+				vCour = -UtilLex.valEnt;
+				break;
+			
+			// M.À.J   B O O L
+			case 7:
+				vCour = VRAI;
+				break;
+
+			case 8:
+				vCour = FAUX;
+				break;
+
+			//|===========================================|@primaire
+			//|				P R I M A I R E				  |
+			//|===========================================|
+
+			// V A L E U R
+			case 9:
+				int index = presentIdent(1);
+				if (index == 0) { UtilLex.messErr("Variable { "+ UtilLex.chaineIdent(UtilLex.numIdCourant) +" } non déclarée"); break;}
+
+				if (tabSymb[index].categorie == CONSTANTE) {
+					po.produire(EMPILER);
+					po.produire(tabSymb[index].info);
+				} else {
+					po.produire(CONTENUG);
+					po.produire(index);
+				}
+				break;
+
+			// I D E N T
+			case 10:
+				po.produire(EMPILER);
+				po.produire(vCour);
+				break;
+
+			//|===========================================|@exp
+			//|			  E X P R E S S I O N			  |
+			//|===========================================|
+			case 11 :
+				po.produire(DIV);
+				break;
+
+			case 12:
+				po.produire(MUL);
+				break;
+			
+			case 13:
+				po.produire(SOUS);
+				break;
+
+			case 14:
+				po.produire(ADD);
+				break;
+
+			case 15:
+				po.produire(INFEG);
+				break;
+
+			case 16:
+				po.produire(INF);
+				break;
+			
+			case 17:
+				po.produire(SUPEG);
+				break;
+
+			case 18:
+				po.produire(SUP);
+				break;
+
+			case 19:
+				po.produire(DIFF);
+				break;
+			
+			case 20:
+				po.produire(EG);
+				break;
+
+			case 21:
+				po.produire(NON);
+				break;
+
+			case 22:
+				po.produire(ET);
+				break;
+
+			case 23:
+				po.produire(OU);
+				break;
+
+			//|===========================================|@affouappel
+			//|			  A F F O U A P P E L			  |
+			//|===========================================|
+
+			case 24:
+				int iAff = presentIdent(1);
+				if (iAff == 0) {UtilLex.messErr("Variable { "+ UtilLex.chaineIdent(UtilLex.numIdCourant) +" } non déclarée !"); break;}
+				if (tabSymb[iAff].categorie == CONSTANTE) { UtilLex.messErr("Ré-affectation des constantes interdite !"); break;}
+				adresseAff = iAff;
+				break;
+
+			case 25:
+				po.produire(AFFECTERG);
+				po.produire(adresseAff);
+				break;
+
+			//|===========================================|@lecture
+			//|    L E C T U R E   &   E C R I T U R E	  |@ecriture
+			//|===========================================|
+
+			case 26:
+				int iLec = presentIdent(1);
+				if (iLec == 0) {UtilLex.messErr("Variable non déclarée, LECTURE impossible !"); break;}
+				if (tabSymb[iLec].categorie == CONSTANTE) {UtilLex.messErr("Ré-affection par LECTURE illégale !"); break;}
+
+				switch (tabSymb[iLec].type) {
+					case ENT:
+						po.produire(LIRENT);
+						break;
+					case BOOL:
+						po.produire(LIREBOOL);
+						break;
+				}
+				
+				po.produire(AFFECTERG);
+				po.produire(iLec);
+
+				break;
+
+			case 27:
+				switch (tCour) {
+					case ENT:
+						po.produire(ECRENT);
+						break;
+					case BOOL:
+						po.produire(ECRBOOL);
+						break;
+				}
+				break;
+
+			//|===========================================|@inssi
+			//|			        I N S S I				  |
+			//|===========================================|
+
+			case 28:
+				po.produire(BSIFAUX);
+				po.produire(-1); // BRANCHEMENT À MODIFIER PLUS TARD
+				pileRep.empiler(po.getIpo());
+				break;
+
+			case 29:
+				po.produire(BINCOND);
+				po.produire(-1); // BRANCHEMENT À MODIFIER PLUS TARD
+				po.modifier(pileRep.depiler(), po.getIpo()+1);
+				pileRep.empiler(po.getIpo());
+				break;
+
+			case 30:
+				po.modifier(pileRep.depiler(), po.getIpo()+1);
+				break;
+
+			//|===========================================|@boucle
+			//|			        B O U C L E				  |
+			//|===========================================|
+
+			case 31:
+				pileRep.empiler(po.getIpo());
+				break;
+
+			case 32:
+				po.produire(BSIFAUX); // BRANCHÉ APRÈS LE CORPS DE LQ BOUCLE
+				po.produire(-1); 
+				pileRep.empiler(po.getIpo());
+				break;
+
+			case 33:
+				po.produire(BINCOND); // BRANCHÉ L'EXPRESSION AU DESSUS DU BSIFAUX
+				po.modifier(pileRep.depiler(), po.getIpo() +2 );
+				po.produire(pileRep.depiler() +1 );
+				break;
+
+			//|===========================================|@inscond
+			//|			       I N S C O N D			  |
+			//|===========================================|
+
+			case 34:
+				po.produire(BSIFAUX);
+				po.produire(0);
+				pileRep.empiler(po.getIpo());
+				break;
+
+			case 35:
+				po.produire(BINCOND);
+				po.produire(pileRep.depiler());
+				pileRep.empiler(po.getIpo());
+				break;
+
+			case 36:
+				break;
+
+			case 37:
+				break;
+				
 			case 255:
 				// En fin de compilation :
 				// - création des fichiers contenant le code produit (exécutable et mnémonique)
