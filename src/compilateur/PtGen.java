@@ -450,21 +450,31 @@ public class PtGen {
 			//|===========================================|
 
 			case 34:
+				pileRep.empiler(0);
+				break;
+
+			case 35:
 				po.produire(BSIFAUX);
 				po.produire(0);
 				pileRep.empiler(po.getIpo());
 				break;
 
-			case 35:
+			case 36:
 				po.produire(BINCOND);
+				po.modifier(pileRep.depiler(), po.getIpo()+2);
 				po.produire(pileRep.depiler());
 				pileRep.empiler(po.getIpo());
 				break;
 
-			case 36:
-				break;
-
 			case 37:
+				int ipoCible = pileRep.depiler();
+				int memoire = po.getElt(ipoCible);
+
+				while (memoire != 0) {
+					memoire = po.getElt(ipoCible);
+					po.modifier(ipoCible, po.getIpo() + 1);
+					ipoCible = memoire;
+				}
 				break;
 				
 			case 255:
@@ -472,6 +482,7 @@ public class PtGen {
 				// - création des fichiers contenant le code produit (exécutable et mnémonique)
 				// - affichage de la table des symboles
 				// TODO À compléter si besoin
+				po.produire(ARRET);
 				po.constObj();
 				po.constGen();
 				afftabSymb();
