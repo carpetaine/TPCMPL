@@ -80,6 +80,6 @@ Une fois compilés, chacun peut être exécuté directement depuis VS Code, en c
 
 Ils peuvent également être exécutés depuis la ligne de commande, en exécutant une commande de la forme suivante, en adaptant les noms du paquet du fichier principal, et éventuellement en ajoutant un/des noms de fichiers d'entrée à passer en argument.
 
-```
+```bash
 java -cp bin/:lib/* nomcomplet.paquet.ProgrammePrincipal sibesoin/chemin/vers/fichierTest.extension
 ```

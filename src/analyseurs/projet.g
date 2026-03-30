@@ -162,40 +162,40 @@ exp1:
 	exp2 ('et' exp2 {PtGen.pt(22);} )*;
 
 exp2:
-	'non' exp2	{PtGen.pt(21);}
+	'non' exp2	    {PtGen.pt(21);}
 	| exp3;
 
 exp3:
 	exp4 (
-		'='    exp4	{PtGen.pt(20);}
-		| '<>' exp4 {PtGen.pt(19);}
-		| '>'  exp4	{PtGen.pt(18);}
-		| '>=' exp4	{PtGen.pt(17);}
-		| '<'  exp4 {PtGen.pt(16);}
-		| '<=' exp4	{PtGen.pt(15);}
+		'='     exp4	{PtGen.pt(20);}
+		| '<>'  exp4  	{PtGen.pt(19);}
+		| '>'   exp4	{PtGen.pt(18);}
+		| '>='  exp4	{PtGen.pt(17);}
+		| '<'   exp4  	{PtGen.pt(16);}
+		| '<='  exp4	{PtGen.pt(15);}
 	)?;
 
 exp4:
 	exp5 (
-		'+'   exp5 			{PtGen.pt(14);}
-		| '-' exp5			{PtGen.pt(13);}
+		'+'    exp5  	{PtGen.pt(14);}
+		| '-'  exp5  	{PtGen.pt(13);}
 	)*;
 
 exp5:
 	primaire (
-		'*' 	primaire 	{PtGen.pt(12);}
-		| 'div' primaire	{PtGen.pt(11);}
+		'*' 	primaire {PtGen.pt(12);}
+		| 'div' primaire {PtGen.pt(11);}
 	)*;
 
 primaire:
-	valeur					{PtGen.pt(10);}
-	| ident					{PtGen.pt(9);}
+	valeur			{PtGen.pt(10);}
+	| ident			{PtGen.pt(9);}
 	| '(' expression ')';
 
 valeur:
 	nbentier 		{PtGen.pt(3); PtGen.pt(5);}
-	| '+' nbentier 	{PtGen.pt(3); PtGen.pt(5);}
-	| '-' nbentier 	{PtGen.pt(3); PtGen.pt(6);}
+	| '+' nbentier 		{PtGen.pt(3); PtGen.pt(5);}
+	| '-' nbentier 		{PtGen.pt(3); PtGen.pt(6);}
 	| 'vrai'		{PtGen.pt(4); PtGen.pt(7);}
 	| 'faux'		{PtGen.pt(4); PtGen.pt(8);}
 	;
