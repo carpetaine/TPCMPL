@@ -132,7 +132,7 @@ inssi:
 inscond:
 	'cond' 	{PtGen.pt(34);} expression		{PtGen.pt(35);} ':' instructions (
 	','	 	{PtGen.pt(36);} expression		{PtGen.pt(35);} ':' instructions )* 
-	('aut'	{PtGen.pt(36);} instructions | 	{PtGen.pt(36);} )
+	('aut'	{PtGen.pt(36);} instructions |   )
 	'fcond' {PtGen.pt(37);}
 	;
 
