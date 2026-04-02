@@ -490,18 +490,6 @@ public class PtGen {
 					ipoCible = memoire;
 				}
 				break;
-
-			// VerifBOOL
-			case 38:
-				verifBool();
-				break;
-
-			// VerifENT
-			case 39:
-				verifEnt();
-				break;
-
-			
 				
 			case 255:
 				// En fin de compilation :
