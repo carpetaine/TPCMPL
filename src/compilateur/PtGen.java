@@ -244,13 +244,20 @@ public class PtGen {
 			//|					V A L E U R				  |
 			//|===========================================|
 
-			// M.À.J   T Y P E
+			// M.À.J   T Y P E  après  V A L E U R
 			case 3:
 				tCour = ENT;
 				break;
 
 			case 4:
 				tCour = BOOL;
+				break;
+
+			// M.À.J   T Y P E  après  I D E N T
+			case 40:
+				int iVerifType = presentIdent(1);
+				if (iVerifType == 0) {UtilLex.messErr("Variable { "+ UtilLex.chaineIdent(UtilLex.numIdCourant) +" } non déclarée");break;}
+				tCour = tabSymb[iVerifType].type;
 				break;
 
 			// M.À.J   N B E N T I E R
@@ -298,6 +305,8 @@ public class PtGen {
 			//|===========================================|@exp
 			//|			  E X P R E S S I O N			  |
 			//|===========================================|
+
+			// P R O D U C T I O N   C O D E   M A - P I L E
 			case 11 :
 				po.produire(DIV);
 				break;
@@ -348,6 +357,15 @@ public class PtGen {
 
 			case 23:
 				po.produire(OU);
+				break;
+
+			// V É R I F I C A T I O N S   de   T Y P E
+			case 41:
+				verifEnt();
+				break;
+
+			case 42:
+				verifBool();
 				break;
 
 			//|===========================================|@affouappel
@@ -430,7 +448,7 @@ public class PtGen {
 				break;
 
 			case 32:
-				po.produire(BSIFAUX); // BRANCHÉ APRÈS LE CORPS DE LQ BOUCLE
+				po.produire(BSIFAUX); // BRANCHÉ APRÈS LE CORPS DE LA BOUCLE
 				po.produire(-1); 
 				pileRep.empiler(po.getIpo());
 				break;
@@ -472,6 +490,18 @@ public class PtGen {
 					ipoCible = memoire;
 				}
 				break;
+
+			// VerifBOOL
+			case 38:
+				verifBool();
+				break;
+
+			// VerifENT
+			case 39:
+				verifEnt();
+				break;
+
+			
 				
 			case 255:
 				// En fin de compilation :

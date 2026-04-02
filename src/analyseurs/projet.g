@@ -130,10 +130,10 @@ inssi:
 	'si' expression {PtGen.pt(28);} 'alors' instructions ('sinon' {PtGen.pt(29);} instructions )? 'fsi' {PtGen.pt(30);} ;
 
 inscond:
-	'cond' 	 {PtGen.pt(34);} expression		{PtGen.pt(35);} ':' instructions (
-		','	 {PtGen.pt(36);} expression		{PtGen.pt(35);} ':' instructions
-	)* ('aut'{PtGen.pt(36);} instructions | {PtGen.pt(36);} ) 
-	'fcond'  {PtGen.pt(37);}
+	'cond' 	{PtGen.pt(34);} expression		{PtGen.pt(35);} ':' instructions (
+	','	 	{PtGen.pt(36);} expression		{PtGen.pt(35);} ':' instructions )* 
+	('aut'	{PtGen.pt(36);} instructions | 	{PtGen.pt(36);} )
+	'fcond' {PtGen.pt(37);}
 	;
 
 boucle:
@@ -156,46 +156,46 @@ effixes:
 effmods:
 	'(' (ident (',' ident)*)? ')';
 
-expression: (exp1) ('ou' exp1 {PtGen.pt(23);} )*;
+expression: (exp1) ('ou' {PtGen.pt(42);} exp1 {PtGen.pt(42); PtGen.pt(23);} )*;
 
 exp1:
-	exp2 ('et' exp2 {PtGen.pt(22);} )*;
+	exp2 ('et' {PtGen.pt(42);} exp2 {PtGen.pt(42); PtGen.pt(22);} )*;
 
 exp2:
-	'non' exp2	    {PtGen.pt(21);}
+	'non' {PtGen.pt(42);} exp2 {PtGen.pt(42); PtGen.pt(21);}
 	| exp3;
 
 exp3:
 	exp4 (
-		'='     exp4	{PtGen.pt(20);}
-		| '<>'  exp4  	{PtGen.pt(19);}
-		| '>'   exp4	{PtGen.pt(18);}
-		| '>='  exp4	{PtGen.pt(17);}
-		| '<'   exp4  	{PtGen.pt(16);}
-		| '<='  exp4	{PtGen.pt(15);}
+		'='    {PtGen.pt(41);} exp4	{PtGen.pt(41); PtGen.pt(20);}
+		| '<>' {PtGen.pt(41);} exp4 {PtGen.pt(41); PtGen.pt(19);}
+		| '>'  {PtGen.pt(41);} exp4	{PtGen.pt(41); PtGen.pt(18);}
+		| '>=' {PtGen.pt(41);} exp4	{PtGen.pt(41); PtGen.pt(17);}
+		| '<'  {PtGen.pt(41);} exp4 {PtGen.pt(41); PtGen.pt(16);}
+		| '<=' {PtGen.pt(41);} exp4	{PtGen.pt(41); PtGen.pt(15);}
 	)?;
 
 exp4:
 	exp5 (
-		'+'    exp5  	{PtGen.pt(14);}
-		| '-'  exp5  	{PtGen.pt(13);}
+		'+'   {PtGen.pt(41);} exp5 {PtGen.pt(41); PtGen.pt(14);}
+		| '-' {PtGen.pt(41);} exp5 {PtGen.pt(41); PtGen.pt(13);}
 	)*;
 
 exp5:
 	primaire (
-		'*' 	primaire {PtGen.pt(12);}
-		| 'div' primaire {PtGen.pt(11);}
+		'*' 	{PtGen.pt(41);} primaire {PtGen.pt(41); PtGen.pt(12);}
+		| 'div' {PtGen.pt(41);} primaire {PtGen.pt(41); PtGen.pt(11);}
 	)*;
 
 primaire:
 	valeur			{PtGen.pt(10);}
-	| ident			{PtGen.pt(9);}
+	| ident			{PtGen.pt(9); PtGen.pt(40);}
 	| '(' expression ')';
 
 valeur:
 	nbentier 		{PtGen.pt(3); PtGen.pt(5);}
-	| '+' nbentier 		{PtGen.pt(3); PtGen.pt(5);}
-	| '-' nbentier 		{PtGen.pt(3); PtGen.pt(6);}
+	| '+' nbentier 	{PtGen.pt(3); PtGen.pt(5);}
+	| '-' nbentier 	{PtGen.pt(3); PtGen.pt(6);}
 	| 'vrai'		{PtGen.pt(4); PtGen.pt(7);}
 	| 'faux'		{PtGen.pt(4); PtGen.pt(8);}
 	;
