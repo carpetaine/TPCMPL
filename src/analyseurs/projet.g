@@ -93,7 +93,7 @@ type:
 decprocs: {PtGen.pt(43);} (decproc ptvg)+ {PtGen.pt(44);} ;
 
 decproc:
-	'proc' ident {PtGen.pt(45);} parfixe? parmod? consts? {PtGen.pt(49);} vars? corps {PtGen.pt(50);} ;
+	'proc' ident {PtGen.pt(45);} parfixe? parmod? {PtGen.pt(49);} consts? vars? corps {PtGen.pt(50);} ;
 
 ptvg:
 	';'
@@ -154,7 +154,7 @@ effixes:
 	'(' (expression {PtGen.pt(52);} (',' expression {PtGen.pt(52);} )*)? ')';
 
 effmods:
-	'(' (ident {PtGen.pt(52);} (',' ident {PtGen.pt(52);} )*)? ')';
+	'(' (ident {PtGen.pt(52); PtGen.pt(55);} (',' ident {PtGen.pt(52); PtGen.pt(55);} )*)? ')';
 
 expression: (exp1) ('ou' {PtGen.pt(42);} exp1 {PtGen.pt(42); PtGen.pt(4); PtGen.pt(23);} )*;
 
