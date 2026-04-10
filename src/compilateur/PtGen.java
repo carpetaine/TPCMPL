@@ -58,7 +58,12 @@ public class PtGen {
 	private static int tCour;
 
 	// adresse d'éxecution à sauvegarder pour une affection
-	private static int adresseAff, reservation, addrExec;
+	private static int  reservation,
+						adrExec,
+						adrLoc,
+						nbProc,
+						nbArg,
+						nbParam;
 
 	// TABLE DES SYMBOLES
 	// ----------------------
@@ -91,7 +96,7 @@ public class PtGen {
 	 */
 	private static void placeIdent(int code, int cat, int type, int info) {
 		if (it == MAXSYMB)
-			UtilLex.messErr("debordement de la table des symboles");
+			UtilLex.messErr("débordement de la table des symboles");
 		it = it + 1;
 		tabSymb[it] = new EltTabSymb(code, cat, type, info);
 	}
@@ -191,8 +196,11 @@ public class PtGen {
 		tCour = NEUTRE;
 
 		reservation = 0;
-		adresseAff = -1;
-		addrExec = 0;
+		nbProc = 0;
+		nbParam = 0;
+		nbArg = 0;
+		adrExec = 0;
+		adrLoc = 0;
 	}
 
 	/**
@@ -214,22 +222,21 @@ public class PtGen {
 
 			// CONSTANTE
 			case 1:
-				if (presentIdent(bc)>0) {
+				if (presentIdent(bc) > bc) {
 					UtilLex.messErr("Ré-affectation des constantes interdite");
 					break;
 				}
-				// P R O C
-				placeIdent(UtilLex.numIdCourant, CONSTANTE, tCour, vCour);
+				else placeIdent(UtilLex.numIdCourant, CONSTANTE, tCour, vCour);
 				break;
 
 			// VARGLOBALE
 			case 2:
-				if (presentIdent(bc)>0) {
+				if (presentIdent(bc) > bc) {
 					UtilLex.messErr("Ident { "+ UtilLex.chaineIdent(UtilLex.numIdCourant) +" } déjà reservé");
 					break;
 				}
-				// P R O C
-				placeIdent(UtilLex.numIdCourant, VARGLOBALE, tCour, addrExec++);
+				if (bc != 1) placeIdent(UtilLex.numIdCourant,VARLOCALE, tCour, adrLoc++);
+				else placeIdent(UtilLex.numIdCourant, VARGLOBALE, tCour, adrExec++);
 				// Mises à jour var
 				reservation += 1;
 				break;
@@ -286,14 +293,22 @@ public class PtGen {
 			case 9:
 				int index = presentIdent(1);
 				if (index == 0) { UtilLex.messErr("Variable { "+ UtilLex.chaineIdent(UtilLex.numIdCourant) +" } non déclarée"); break;}
+				int categorie = tabSymb[index].categorie;
 
-				if (tabSymb[index].categorie == CONSTANTE) {
+				if(categorie == CONSTANTE) { 
 					po.produire(EMPILER);
 					po.produire(tabSymb[index].info);
-				} else {
-					po.produire(CONTENUG);
-					po.produire(tabSymb[index].info);
+					break;
 				}
+
+				if (bc != 1) po.produire(CONTENUL);
+				else po.produire(CONTENUG);
+
+				po.produire(tabSymb[index].info);
+
+				if (bc != 1 && (categorie == VARLOCALE || categorie == PARAMFIXE)) {po.produire(0);break;}
+				if (bc != 1 && categorie == PARAMMOD) {po.produire(1);break;}
+
 				break;
 
 			// V A L E U R
@@ -361,10 +376,12 @@ public class PtGen {
 
 			// V É R I F I C A T I O N S   de   T Y P E
 			case 41:
+				System.out.println("verifEnt() "+tCour);
 				verifEnt();
 				break;
 
 			case 42:
+				System.out.println("verifBool() "+tCour);
 				verifBool();
 				break;
 
@@ -376,12 +393,33 @@ public class PtGen {
 				int iAff = presentIdent(1);
 				if (iAff == 0) {UtilLex.messErr("Variable { "+ UtilLex.chaineIdent(UtilLex.numIdCourant) +" } non déclarée !"); break;}
 				if (tabSymb[iAff].categorie == CONSTANTE) { UtilLex.messErr("Ré-affectation des constantes interdite !"); break;}
-				adresseAff = tabSymb[iAff].info;
+				if (bc == 1) {
+					pileRep.empiler(tabSymb[iAff].info);
+					pileRep.empiler(AFFECTERG);
+				}
+				else {
+					switch (tabSymb[iAff].categorie) {
+						case VARLOCALE:
+							pileRep.empiler(0);
+							pileRep.empiler(tabSymb[iAff].info);
+							pileRep.empiler(AFFECTERL);
+							break;
+						case PARAMMOD:
+							pileRep.empiler(1);
+							pileRep.empiler(tabSymb[iAff].info);
+							pileRep.empiler(AFFECTERL);
+							break;
+						case PARAMFIXE:
+							UtilLex.messErr("Ré-affectation d'un paramètre fixe interdite !");
+							break;
+					}
+				}
 				break;
 
 			case 25:
-				po.produire(AFFECTERG);
-				po.produire(adresseAff);
+				po.produire(pileRep.depiler());
+				po.produire(pileRep.depiler());
+				if (bc !=1) po.produire(pileRep.depiler());
 				break;
 
 			//|===========================================|@lecture
@@ -391,7 +429,7 @@ public class PtGen {
 			case 26:
 				int iLec = presentIdent(1);
 				if (iLec == 0) {UtilLex.messErr("Variable non déclarée, LECTURE impossible !"); break;}
-				if (tabSymb[iLec].categorie == CONSTANTE) {UtilLex.messErr("Ré-affection par LECTURE illégale !"); break;}
+				if (tabSymb[iLec].categorie == CONSTANTE) {UtilLex.messErr("LECTURE d'une constante illégale !"); break;}
 
 				switch (tabSymb[iLec].type) {
 					case ENT:
@@ -401,10 +439,28 @@ public class PtGen {
 						po.produire(LIREBOOL);
 						break;
 				}
-				
-				po.produire(AFFECTERG);
-				po.produire(tabSymb[iLec].info);
 
+				if (bc != 1) {
+					switch (tabSymb[iLec].categorie) {
+						case VARLOCALE:
+							po.produire(AFFECTERL);
+							po.produire(tabSymb[iLec].info);
+							po.produire(0);
+							break;
+						case PARAMMOD:
+							po.produire(AFFECTERL);
+							po.produire(tabSymb[iLec].info);
+							po.produire(1);
+							break;
+						case PARAMFIXE:
+							UtilLex.messErr("Ré-affectation d'un paramètre fixe interdite !");
+							break;
+					}
+				}
+				else {
+					po.produire(AFFECTERG);
+					po.produire(tabSymb[iLec].info);
+				}
 				break;
 
 			case 27:
@@ -491,6 +547,90 @@ public class PtGen {
 				}
 				break;
 				
+			//|===========================================|@proc
+			//|			      	 P R O C				  |
+			//|===========================================|
+			
+			// D E C P R O C S
+			case 43:
+				po.produire(BINCOND);
+				po.produire(0);
+				// branchement qui saute les procédures (attente du 'debut' du programme principal)
+				pileRep.empiler(po.getIpo());
+				break;
+
+			// F I N   D E C P R O C S (début programme principal)
+			case 44:
+				po.modifier(pileRep.depiler(),po.getIpo() + 1 );
+				break;
+
+			// D E C P R O C
+			case 45:
+				if (presentIdent(1) != 0) 
+					{ UtilLex.messErr("La procédure "+UtilLex.numIdCourant+" porte le nom d'une variable déjà déclarée !"); break;}
+
+				placeIdent(UtilLex.numIdCourant, PROC  , NEUTRE, po.getIpo());
+				placeIdent(                 -1 , PRIVEE, NEUTRE, 0);
+				nbProc++;
+				bc = it + 1; // changement ce contexte pour compilation de la procédure
+				break;
+
+			// ajout PARAMFIXES
+			case 47:
+				if (presentIdent(bc) > bc) 
+					{UtilLex.messErr("Le paramètre fixe "+UtilLex.numIdCourant+" est déjà déclaré !"); break;}
+
+				placeIdent(UtilLex.numIdCourant, PARAMFIXE, tCour, nbParam);
+				nbParam++;
+				break;
+
+			// ajout PARAMMOD
+			case 48:
+				if (presentIdent(bc) > bc)
+					{UtilLex.messErr("Le paramètre modifiable "+UtilLex.numIdCourant+" est déjà déclaré !"); break;}
+
+				placeIdent(UtilLex.numIdCourant, PARAMMOD, tCour, nbParam);
+				nbParam++;
+				break;
+
+			// m.à.j   adrLoc pour adressage correct des variables locales
+			case 49:
+				tabSymb[bc+1].info = nbParam; // m.à.j   tabSymb
+				adrLoc = nbParam+2;
+				break;
+
+			case 50:
+				for (int i=bc+1 ; i<(bc+nbParam) ; i++) {
+					tabSymb[i].code = -1;
+				}
+				it = bc+nbParam;
+				po.produire(RETOUR);
+				po.produire(nbParam);
+				nbParam = 0;
+				break;
+
+			case 51:
+				int iAppel = presentIdent(1);
+				if(iAppel == 0) UtilLex.messErr("La procédure "+UtilLex.numIdCourant+" n'existe pas !");
+				nbArg = 0;
+				pileRep.empiler(tabSymb[iAppel].info);
+				break;
+			
+			case 52:
+				nbArg +=1;
+				break;
+
+			case 53:
+				int iParamMod = presentIdent(1);
+				if(iParamMod == 0) UtilLex.messErr("Le paramètre modifiable "+UtilLex.numIdCourant+" n'existe pas !");
+				break;
+
+			case 54:
+				po.produire(APPEL);
+				po.produire(pileRep.depiler()); // tabSymb[proc].info 
+				po.produire(nbArg);
+				break;
+
 			case 255:
 				// En fin de compilation :
 				// - création des fichiers contenant le code produit (exécutable et mnémonique)

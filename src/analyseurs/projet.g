@@ -90,29 +90,29 @@ type:
 	| 'bool'	{PtGen.pt(4);}
 	;	
 
-decprocs: (decproc ptvg)+;
+decprocs: {PtGen.pt(43);} (decproc ptvg)+ {PtGen.pt(44);} ;
 
 decproc:
-	'proc' ident parfixe? parmod? consts? vars? corps;
+	'proc' ident {PtGen.pt(45);} parfixe? parmod? consts? {PtGen.pt(49);} vars? corps {PtGen.pt(50);} ;
 
 ptvg:
 	';'
 	|;
 
 corps:
-	'debut' instructions 'fin';
+   'debut' instructions 'fin';
 
 parfixe:
 	'fixe' '(' pf (';' pf)* ')';
 
 pf:
-	type ident (',' ident)*;
+	type ident {PtGen.pt(47);} (',' ident {PtGen.pt(47);} )*;
 
 parmod:
 	'mod' '(' pm (';' pm)* ')';
 
 pm:
-	type ident (',' ident)*;
+	type ident {PtGen.pt(48);} (',' ident {PtGen.pt(48);} )*;
 
 instructions:
 	instruction (';' instruction)*;
@@ -146,45 +146,45 @@ ecriture:
 	'ecrire' '(' expression {PtGen.pt(27);} (',' expression {PtGen.pt(27);} )* ')';
 
 affouappel:
-	ident {PtGen.pt(24);} (':=' expression {PtGen.pt(25);} 
-	| (effixes (effmods)?)?)
+	ident  (':=' {PtGen.pt(24);} expression {PtGen.pt(25);} 
+	| {PtGen.pt(51);} (effixes (effmods)?)? {PtGen.pt(54);} )
 	;
 
 effixes:
-	'(' (expression (',' expression)*)? ')';
+	'(' (expression {PtGen.pt(52);} (',' expression {PtGen.pt(52);} )*)? ')';
 
 effmods:
-	'(' (ident (',' ident)*)? ')';
+	'(' (ident {PtGen.pt(52);} (',' ident {PtGen.pt(52);} )*)? ')';
 
-expression: (exp1) ('ou' {PtGen.pt(42);} exp1 {PtGen.pt(42); PtGen.pt(23);} )*;
+expression: (exp1) ('ou' {PtGen.pt(42);} exp1 {PtGen.pt(42); PtGen.pt(4); PtGen.pt(23);} )*;
 
 exp1:
-	exp2 ('et' {PtGen.pt(42);} exp2 {PtGen.pt(42); PtGen.pt(22);} )*;
+	exp2 ('et' {PtGen.pt(42);} exp2 {PtGen.pt(42); PtGen.pt(4); PtGen.pt(22);} )*;
 
 exp2:
-	'non' {PtGen.pt(42);} exp2 {PtGen.pt(42); PtGen.pt(21);}
-	| exp3;
+	'non' exp2 {PtGen.pt(42); PtGen.pt(4); PtGen.pt(21);}
+	| exp3 ;
 
 exp3:
 	exp4 (
-		'='    {PtGen.pt(41);} exp4	{PtGen.pt(41); PtGen.pt(20);}
-		| '<>' {PtGen.pt(41);} exp4 {PtGen.pt(41); PtGen.pt(19);}
-		| '>'  {PtGen.pt(41);} exp4	{PtGen.pt(41); PtGen.pt(18);}
-		| '>=' {PtGen.pt(41);} exp4	{PtGen.pt(41); PtGen.pt(17);}
-		| '<'  {PtGen.pt(41);} exp4 {PtGen.pt(41); PtGen.pt(16);}
-		| '<=' {PtGen.pt(41);} exp4	{PtGen.pt(41); PtGen.pt(15);}
+		'='    {PtGen.pt(41);} exp4	{PtGen.pt(41); PtGen.pt(4); PtGen.pt(20);}
+		| '<>' {PtGen.pt(41);} exp4 {PtGen.pt(41); PtGen.pt(4); PtGen.pt(19);}
+		| '>'  {PtGen.pt(41);} exp4	{PtGen.pt(41); PtGen.pt(4); PtGen.pt(18);}
+		| '>=' {PtGen.pt(41);} exp4	{PtGen.pt(41); PtGen.pt(4); PtGen.pt(17);}
+		| '<'  {PtGen.pt(41);} exp4 {PtGen.pt(41); PtGen.pt(4); PtGen.pt(16);}
+		| '<=' {PtGen.pt(41);} exp4	{PtGen.pt(41); PtGen.pt(4); PtGen.pt(15);}
 	)?;
 
 exp4:
 	exp5 (
-		'+'   {PtGen.pt(41);} exp5 {PtGen.pt(41); PtGen.pt(14);}
-		| '-' {PtGen.pt(41);} exp5 {PtGen.pt(41); PtGen.pt(13);}
+		'+'   {PtGen.pt(41);} exp5 {PtGen.pt(41); PtGen.pt(3); PtGen.pt(14);}
+		| '-' {PtGen.pt(41);} exp5 {PtGen.pt(41); PtGen.pt(3); PtGen.pt(13);}
 	)*;
 
 exp5:
 	primaire (
-		'*' 	{PtGen.pt(41);} primaire {PtGen.pt(41); PtGen.pt(12);}
-		| 'div' {PtGen.pt(41);} primaire {PtGen.pt(41); PtGen.pt(11);}
+		'*' 	{PtGen.pt(41);} primaire {PtGen.pt(41); PtGen.pt(3); PtGen.pt(12);}
+		| 'div' {PtGen.pt(41);} primaire {PtGen.pt(41); PtGen.pt(3); PtGen.pt(11);}
 	)*;
 
 primaire:
